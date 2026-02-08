@@ -1,0 +1,15 @@
+- name: Setup Velero Secrets
+  hosts: master
+  tasks:
+    - name: Create Velero Namespace
+      kubernetes.core.k8s:
+        name: velero
+        kind: Namespace
+        state: present
+
+    - name: Create S3 Credentials Secret
+      shell: |
+        kubectl create secret generic cloud-credentials \
+          --namespace velero \
+          --from-literal=cloud=./credentials-velero \
+          --dry-run=client -o yaml | kubectl apply -f -

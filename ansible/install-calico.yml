@@ -1,0 +1,21 @@
+- name: Install Calico Networking
+  hosts: master
+  tasks:
+    - name: Apply Calico Operator
+      shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml
+      args:
+        creates: /etc/origin/master/scheduler.json # Just a check to prevent re-runs
+
+    - name: Download Calico Custom Resources locally
+      get_url:
+        url: https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/custom-resources.yaml
+        dest: /tmp/calico-resources.yaml
+
+    - name: Update CIDR in Calico Resources
+      replace:
+        path: /tmp/calico-resources.yaml
+        regexp: 'cidr: 192.168.0.0/16'
+        replace: 'cidr: 10.244.0.0/16'
+
+    - name: Apply Calico Custom Resources
+      shell: kubectl apply -f /tmp/calico-resources.yaml

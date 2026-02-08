@@ -1,0 +1,27 @@
+primary:
+  persistence:
+    enabled: true
+    size: 8Gi
+  initdb:
+    scripts:
+      create-db.sql: |
+        CREATE DATABASE rocksolid;
+backup:
+  enabled: true
+  cronjob:
+    extraContainers:
+      - name: s3-uploader
+        image: amazon/aws-cli
+        command:
+          - /bin/sh
+          - -c
+          - |
+            sleep 30
+            aws s3 sync /backup/pgdump s3://rock-solid-postgres-backups
+        envFrom:
+          - secretRef:
+              name: cloud-credentials
+        volumeMounts:
+          - name: datadir
+            mountPath: /backup/pgdump
+

@@ -1,8 +1,6 @@
 *.log
-
 *.tfstate
 *.tfstate.backup
 .terraform/
-
 *.yaml.bak
-
+*.ini
